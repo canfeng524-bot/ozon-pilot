@@ -1,0 +1,6 @@
+interface:
+  display_name: "Ozon Pilot"
+  short_description: "将1688/淘宝货源转为可审核的Ozon上架包"
+  default_prompt: "Use $ozon-pilot to turn this 1688 or Taobao product into a reviewable Ozon listing package."
+policy:
+  allow_implicit_invocation: true
