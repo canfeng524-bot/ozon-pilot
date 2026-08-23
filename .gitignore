@@ -1,0 +1,22 @@
+# Local Python/runtime dependencies
+.deps/
+__pycache__/
+*.py[cod]
+
+# Local product workspaces and generated review artifacts
+.stage_*/
+workspace/
+.qa_*.jpg
+.contact_*.jpg
+
+# Secrets and machine-local overrides
+.env
+.env.*
+!.env.example
+config.local.yaml
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
