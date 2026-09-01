@@ -82,9 +82,20 @@ def esc(s):
 
 def run(cfg, folder, info):
     lp = os.path.join(folder, "listing.json")
-    listing = json.load(open(lp, encoding="utf-8"))["listing"] if os.path.exists(lp) else None
+    listing = None
+    if os.path.exists(lp):
+        with open(lp, encoding="utf-8") as f:
+            listing = json.load(f)["listing"]
+    kp = os.path.join(folder, "keyword_plan.json")
+    keyword_plan = None
+    if os.path.exists(kp):
+        with open(kp, encoding="utf-8") as f:
+            keyword_plan = json.load(f)
     sp = os.path.join(folder, "screen.json")
-    screen = json.load(open(sp, encoding="utf-8")) if os.path.exists(sp) else {"items": [], "core": [], "drop": []}
+    screen = {"items": [], "core": [], "drop": []}
+    if os.path.exists(sp):
+        with open(sp, encoding="utf-8") as f:
+            screen = json.load(f)
 
     plan_list = cfg["carousel_plan"]
     plan = {s["id"]: s for s in plan_list}
@@ -108,6 +119,27 @@ def run(cfg, folder, info):
     copy_html = ""
     if listing:
         L = listing
+        used_terms = L.get("search_terms_used", [])
+        excluded_terms = L.get("search_terms_excluded", [])
+        keyword_html = ""
+        if used_terms or excluded_terms or keyword_plan:
+            status = (keyword_plan or {}).get("status", "listing_only")
+            used_html = "".join(
+                f"<li><b>{esc(x.get('term'))}</b> · {esc(x.get('placement'))} · "
+                f"{esc(x.get('evidence_tier'))}级 — {esc(x.get('reason'))}</li>"
+                for x in used_terms
+            ) or "<li>当前文案未返回可审计的 search_terms_used。</li>"
+            excluded_html = "".join(
+                f"<li><b>{esc(x.get('term'))}</b> — {esc(x.get('reason'))}</li>"
+                for x in excluded_terms
+            )
+            keyword_html = (
+                f"<div style='margin-top:14px;padding-top:12px;border-top:1px solid #e5e7eb'>"
+                f"<b>搜索词依据</b> <span class='sub'>keyword_plan: {esc(status)}</span>"
+                f"<ul class='points'>{used_html}</ul>"
+                + (f"<b>已排除</b><ul class='points'>{excluded_html}</ul>" if excluded_html else "")
+                + "</div>"
+            )
         copy_html = f"""
         <div class="card"><h2><span class="n">3</span>俄语文案 <span class="sub">灰字为中文对照</span></h2>
         <div class="ru">{esc(L.get('title_ru'))}</div><div class="zh">中：{esc(L.get('title_ru_zh'))}</div>
@@ -116,7 +148,7 @@ def run(cfg, folder, info):
             for a, b in zip(L.get("highlights_ru", []), L.get("highlights_zh", []))) + f"""
         </ul>
         <div class="ru" style="white-space:pre-line;margin-top:10px">{esc(L.get('description_ru'))}</div>
-        <div class="zh">中：{esc(L.get('description_zh'))}</div></div>"""
+        <div class="zh">中：{esc(L.get('description_zh'))}</div>{keyword_html}</div>"""
     else:
         copy_html = ('<div class="card"><h2><span class="n">3</span>俄语文案</h2>'
                      '<div class="warn">未生成：请执行 copy_prompt.md 里的提示词，结果存为 listing.json 后重跑</div></div>')
@@ -132,6 +164,11 @@ def run(cfg, folder, info):
         for a in listing.get("attributes_ru", []):
             ws.append([a.get("name", ""), a.get("value", "")])
         ws.append(["Цена, руб (售价)", cfg["pricing"]["suggested_price_rub"]])
+        ws_kw = wb.create_sheet("search_terms")
+        ws_kw.append(["词", "位置", "证据等级", "理由"])
+        for item in listing.get("search_terms_used", []):
+            ws_kw.append([item.get("term", ""), item.get("placement", ""),
+                          item.get("evidence_tier", ""), item.get("reason", "")])
         ws2 = wb.create_sheet("images")
         ws2.append(["槽位", "文件"])
         for f in imgs:

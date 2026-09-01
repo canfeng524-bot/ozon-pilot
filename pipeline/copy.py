@@ -20,13 +20,19 @@ def call_llm(cfg, data_json):
         return json.loads(r.read())["choices"][0]["message"]["content"]
 
 
-def run(cfg, folder, info, skip_ai=False):
+def run(cfg, folder, info, keyword_plan=None, skip_ai=False):
     lp = os.path.join(folder, "listing.json")
     if os.path.exists(lp):
         print("  ✓ listing.json 已存在，跳过（删除可重新生成）")
         return
     mc = cfg["models"]["copy"]
     data = {k: info.get(k) for k in ("title", "price_cny", "attributes", "logistics", "sku_specs", "main_images")}
+    data["keyword_plan"] = keyword_plan or {
+        "status": "not_available",
+        "title_terms": {"core": [], "attribute": [], "scene": []},
+        "description_terms": [],
+        "excluded_terms": [],
+    }
     data_json = json.dumps(data, ensure_ascii=False)
     if (not skip_ai) and mc.get("api_key"):
         try:
