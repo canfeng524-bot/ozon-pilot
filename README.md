@@ -31,6 +31,7 @@ python run.py "E:\ozon商品\intake\20260822_新品" --refresh-images
 | ozon_listing.xlsx | 导入模板 + 价格测算 |
 | remastered/ | 上架图（1350×1800）+ ai_todo.json（待 AI 生成的槽位和提示词） |
 | copy_prompt.md | 未配置文案模型时，粘给任意大模型生成 listing.json |
+| keyword_plan.json | 搜索词证据等级、标题/描述候选词及排除词；没有研究数据时明确标记，不伪造热度 |
 | source/ | 主图 + 详情原图 |
 | screen.json | 每张源图的筛选结论 |
 
@@ -49,9 +50,18 @@ python run.py "E:\ozon商品\intake\20260822_新品" --refresh-images
 少量长尾词，不逐字翻译中文，不用礼物/家用/通勤等无关词堆砌搜索覆盖。季节或临近节日词必须同时有
 商品相关性和当期 Ozon 站内依据，标题最多使用一个，且不能在没有 Seller 搜索数据时声称它是高频热词。
 
+### 搜索热度与关键词
+
+如有 Ozon Seller「Запросы моего товара」数据，在商品文件夹放置 `keyword_research.json` 后运行。流水线会先生成
+`keyword_plan.json`，再把可用词传给文案模型。A级为 Seller 查询指标，B级为45天内 Ozon 联想/分类/搜索页当前用语，
+C级为其他或过期线索。只有与 SKU 精确匹配且有正向需求信号的 A 词，或当前表达明确的 B 词能进入标题；
+Seller 各项指标全为 0 不算热度证明。部分匹配词仅用于描述，排除词禁止使用。
+字段结构和女包示例见 `references/keyword-research.md`。
+
 ## 配置（config.yaml）
 
 - `prompts.copy_system`：文案提示词。标题固定为“俄罗斯买家会搜索的核心品类词在前 + 已验证属性居中 + 匹配商品的场景词置后”；避免逐字翻译、关键词堆砌和错误人群/用途。
+- `keyword_policy`：Ozon 当前站内证据的有效期、标题各类词上限和描述长尾词上限。
 - `image_prompts`：主图/模特图生成提示词
 - `carousel_plan`：1张实际首图+1张首图备选+7副图槽位计划（类型/俄语标注/提示词）
 - `intake.min_image_short_side_px`：源图短边质量门槛；低于此值的主图与详情图直接从素材池剔除（默认 600px）。
@@ -66,7 +76,7 @@ python run.py "E:\ozon商品\intake\20260822_新品" --refresh-images
 
 ```
 链接/JSON → 下载源图 → 筛选(视觉模型或启发式) → 合成(真实素材+程序排版+AI)
-→ 文案(LLM) → review.html + xlsx → 人工审核 → Ozon 后台上架
+→ 关键词证据计划 → 文案(LLM) → review.html + xlsx → 人工审核 → Ozon 后台上架
 ```
 
 ## 真实素材 vs AI 的分工原则

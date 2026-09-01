@@ -17,7 +17,7 @@ LOCAL_DEPS = os.path.join(HERE, ".deps")
 if os.path.isdir(LOCAL_DEPS):
     sys.path.insert(0, LOCAL_DEPS)
 
-from pipeline import fetch, download, screen, compose, copy, render
+from pipeline import fetch, download, screen, compose, keywords, copy, render
 
 
 def load_cfg():
@@ -78,10 +78,13 @@ def main():
     # ── ④ 图片合成（真实素材 + 程序排版；AI 槽位按配置） ──
     compose.run(cfg, folder, info, screen_result, skip_ai=skip_ai)
 
-    # ── ⑤ 俄语文案 ──────────────────────────────────────
-    copy.run(cfg, folder, info, skip_ai=skip_ai)
+    # ── ⑤ 搜索词证据计划 ────────────────────────────────
+    keyword_plan = keywords.run(cfg, folder, info)
 
-    # ── ⑥ 审核页 + XLSX ─────────────────────────────────
+    # ── ⑥ 俄语文案 ──────────────────────────────────────
+    copy.run(cfg, folder, info, keyword_plan=keyword_plan, skip_ai=skip_ai)
+
+    # ── ⑦ 审核页 + XLSX ─────────────────────────────────
     render.run(cfg, folder, info)
     log("完成 ✔  打开 review.html 审核，确认后用 ozon_listing.xlsx 上架")
 

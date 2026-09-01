@@ -41,6 +41,12 @@ Treat product facts as evidence-bound:
 
 Before the user uploads anything, remind them to confirm the exact SKU, source-photo commercial-use rights, product sample, category-specific Ozon attributes, and any documentation required for the declared material.
 
+## Search-demand evidence
+
+When the user asks for keyword, search-demand, SEO, seasonal, or trend optimization, read [references/keyword-research.md](references/keyword-research.md). Prefer a dated Ozon Seller `Запросы моего товара` export because it can supply actual searches, views, orders, average position, and revenue. Public Ozon autocomplete, category, filter, and result wording can show how Russians currently phrase a query, but it cannot prove query volume or conversion.
+
+Accept optional `keyword_research.json` in the product folder and run the keyword stage before Russian copy. Inspect the generated `keyword_plan.json`: only exact product matches with a positive A-level Seller demand signal or fresh B-level Ozon wording may become title candidates. A Seller row whose searches, views, orders, and revenue are all zero proves measurement, not demand. Partial matches belong in the description; negative or mismatched queries must remain excluded. Never invent metrics, call public-title repetition “heat,” or copy a competitor title. If no research file exists, allow the pipeline to record `no_keyword_research` and describe the result as relevance-optimized rather than demand-validated.
+
 ## Russian listing language
 
 Build titles in the order `core search phrase → verified differentiating attributes → relevant long-tail use phrase`. Put a natural Russian category phrase first because search cards truncate the title. Choose wording Russians actually use on marketplaces rather than translating the Chinese supplier title word-for-word. Title attributes should normally be material, colour, model, or a core function; keep exact dimensions in the attribute table, description, and size card unless the category or user explicitly requires them in the title. Use only product-relevant synonyms and scenarios: search coverage is not permission to add gift, home, work, school, date, or travel terms indiscriminately. For a supported women's crossbody bag, phrases such as `сумка женская через плечо`, `кросс-боди`, and `повседневная` may be natural; select the smallest non-repetitive set that accurately describes the item. Put additional plausible occasions in the description rather than stuffing the title.
@@ -70,6 +76,7 @@ Inspect the package before calling it ready:
 - `screen.json` — selections, tags, and rejected source images;
 - `remastered/` — carousel images and any unresolved `ai_todo.json`;
 - `listing.json` or `copy_prompt.md` — Russian listing content;
+- `keyword_plan.json` — dated keyword evidence, placement candidates, exclusions, and whether real Seller metrics were available;
 - `review.html` — visual QA page;
 - `ozon_listing.xlsx` and `ozon_package.zip` — generated only when their prerequisites are present.
 
